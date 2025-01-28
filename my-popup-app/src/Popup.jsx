@@ -8,14 +8,39 @@ const Popup = ({ show, handleClose }) => {
   const [answers, setAnswers] = useState({});
 
   useEffect(() => {
-    // Fetch questions and options from the backend
     fetch("http://localhost:5000/api/questions")
-      .then((response) => response.json())
-      .then((data) => setQuestions(data))
-      .catch((error) => console.error("Error fetching questions:", error));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setQuestions(data);
+        } else {
+          throw new Error("Expected an array of questions");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching questions:", error);
+        setQuestions([]);
+      });
   }, []);
 
-  const currentQuestion = questions.find((q) => q.step === currentStep);
+  const currentQuestion = Array.isArray(questions)
+    ? questions.find((q) => q.step === currentStep)
+    : null;
+
+  if (!currentQuestion) {
+    return (
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Body>
+          <p>No questions available or an error occurred.</p>
+        </Modal.Body>
+      </Modal>
+    );
+  }
 
   const handleSave = () => {
     if (currentStep === 1 && answers[currentQuestion.text] === "Yes") {
