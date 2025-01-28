@@ -33,6 +33,30 @@ const Popup = ({ show, handleClose }) => {
     } else if (currentStep === 8.1) {
       setCurrentStep(9);
     } else if (currentStep >= Math.max(...questions.map((q) => q.step))) {
+      fetch("http://localhost:5000/api/saveResponses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answers: Object.keys(answers).map((questionText) => {
+            const question = questions.find((q) => q.text === questionText);
+            // Send the answers as an array with questionId and answer
+            return {
+              questionId: question ? question.id : null, // Map question text to question ID
+              answer: answers[questionText] || null,
+            };
+          }),
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Response saved:", data);
+        })
+        .catch((error) => {
+          console.error("Error saving response:", error);
+        });
+
       alert("Your progress has been saved");
       handleClose();
     } else {
