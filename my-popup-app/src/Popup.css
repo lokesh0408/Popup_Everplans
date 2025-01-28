@@ -1,0 +1,60 @@
+body{
+    background-color: rgb(233, 235, 238);
+}
+
+.popup-body {
+    background-color: rgb(218, 221, 223);
+    text-align: center;
+    padding: 30px !important;
+    border-radius: 12px;
+}
+
+.popup-btn {
+    background-color: white !important; 
+    color: black !important;
+    padding: 15px 25px !important;
+    border-radius: 12px !important;
+    width: 200px;
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease !important;
+    border: none !important; 
+}
+
+.popup-btn:hover {
+    background-color: white !important; 
+    color: black;
+}
+
+.selected {
+    background-color: lightblue !important; 
+    color: black !important;
+    border: none !important; 
+}
+
+.save-btn {
+    background-color: rgb(80, 80, 237) !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    width: 120px;
+    border: none; 
+}
+
+.save-btn:hover {
+    background-color:  rgb(80, 80, 237) !important;
+}
+
+.skip-btn {
+    background-color: rgb(80, 80, 237) !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    width: 120px;
+    border: none; 
+}
+
+.skip-btn:hover {
+    background-color:  rgb(80, 80, 237) !important;
+}
