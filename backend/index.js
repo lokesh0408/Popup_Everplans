@@ -116,4 +116,28 @@ app.post("/api/saveResponses", async (req, res) => {
   }
 });
 
+// notification service
+const admin = require("./firebase");
+
+app.post("/api/sendNotification", async (req, res) => {
+  try {
+    const { title, body, token } = req.body;
+
+    if (!token || !title || !body) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const message = {
+      notification: { title, body },
+      token: token,
+    };
+
+    await admin.messaging().send(message);
+
+    res.json({ success: true, message: "Notification sent successfully!" });
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    res.status(500).json({ error: "Failed to send notification" });
+  }
+});
+
 app.listen(5000, () => console.log("Server running on http://localhost:5000"));

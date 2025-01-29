@@ -1,0 +1,21 @@
+.notification-container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .notification-container input,
+  .notification-container textarea {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+  }
+  
+  .notification-container button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: blue;
+    color: white;
+  }
+  
