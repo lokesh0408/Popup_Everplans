@@ -1,21 +1,88 @@
+body {
+  background: linear-gradient(135deg, #2a2a72, #009ffd);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Notification card */
 .notification-container {
-    max-width: 400px;
-    margin: auto;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  .notification-container input,
-  .notification-container textarea {
-    width: 100%;
-    margin: 10px 0;
-    padding: 10px;
-  }
-  
-  .notification-container button {
-    padding: 10px 20px;
-    cursor: pointer;
-    background-color: blue;
-    color: white;
-  }
-  
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.notification-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Heading */
+.notification-container h2 {
+  margin-bottom: 15px;
+  font-size: 1.6rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Input and textarea fields */
+.notification-container input,
+.notification-container textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.notification-container input::placeholder,
+.notification-container textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.notification-container input:focus,
+.notification-container textarea:focus {
+  border-color: #00c6ff;
+  box-shadow: 0 0 10px rgba(0, 198, 255, 0.4);
+}
+
+.notification-container textarea {
+  height: 100px;
+  resize: none;
+}
+
+/* Button styling */
+.notification-container button {
+  padding: 12px 20px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ff8c00, #ff2e63);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.notification-container button:hover {
+  background: linear-gradient(90deg, #ff6f00, #ff1e50);
+  transform: scale(1.05);
+}
+
+.notification-container button:active {
+  transform: scale(0.95);
+}

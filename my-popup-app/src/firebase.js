@@ -52,6 +52,7 @@ export const onMessageListener = () =>
   new Promise((resolve) => {
     onMessage(messaging, (payload) => {
       console.log("Message received: ", payload);
+      alert(`📢 ${payload.notification.title}\n${payload.notification.body}`);
       resolve(payload);
     });
   });

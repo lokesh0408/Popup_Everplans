@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Popup from "./components/Popup/Popup";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import NotificationPage from "./components/Notifications/NotificationPage";
+import "./App.css";
 
 function App() {
   const [showPopup, setShowPopup] = useState(true);

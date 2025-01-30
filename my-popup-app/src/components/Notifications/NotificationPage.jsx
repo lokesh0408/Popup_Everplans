@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { requestForToken } from "../../firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./NotificationPage.css";
 
 function NotificationPage() {
@@ -7,38 +9,62 @@ function NotificationPage() {
   const [body, setBody] = useState("");
   const [token, setToken] = useState("");
 
+  // Request for Notification Permission and fetch Token
   useEffect(() => {
-    Notification.requestPermission().then(function (permission) {
+    const fetchToken = async () => {
+      const permission = await Notification.requestPermission();
       if (permission === "granted") {
-        async function fetchToken() {
-          const newToken = await requestForToken();
-          console.log("Fetched Token:", newToken);
-          if (newToken) {
-            setToken(newToken);
-          }
-        }
-        fetchToken();
+        const newToken = await requestForToken();
+        if (newToken) setToken(newToken);
       }
-    });
+    };
+
+    fetchToken();
   }, []);
 
+  // Handle the notification send process
   const sendNotification = async () => {
+    if (!title || !body) {
+      alert("Please enter both title and message before sending!");
+      return;
+    }
+
     const payload = { title, body, token };
-    console.log("Payload:", payload);
 
-    const response = await fetch("http://localhost:5000/api/sendNotification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/sendNotification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    const data = await response.json();
-    console.log("Notification sent:", data);
-    alert(data.message || "Error sending notification");
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Notification sent successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
 
-    if (data.success) {
-      setTitle("");
-      setBody("");
+        // Show browser notification if permission is granted
+        if (Notification.permission === "granted") {
+          new Notification(title, { body });
+        }
+
+        setTitle("");
+        setBody("");
+      } else {
+        throw new Error("Error while sending notification!");
+      }
+    } catch (error) {
+      alert(error.message || "Error while sending notification!");
     }
   };
 
@@ -47,17 +73,19 @@ function NotificationPage() {
       <h2>Send Push Notification</h2>
       <input
         type="text"
-        placeholder="Notification Title"
+        placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
-        placeholder="Notification Body"
+        placeholder="Message..."
         value={body}
         onChange={(e) => setBody(e.target.value)}
       ></textarea>
       <input type="text" placeholder="User Token" value={token} readOnly />
       <button onClick={sendNotification}>Send</button>
+
+      <ToastContainer />
     </div>
   );
 }
