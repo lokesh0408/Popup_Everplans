@@ -86,3 +86,13 @@ body {
 .notification-container button:active {
   transform: scale(0.95);
 }
+
+.button-group {
+  display: flex;
+  gap: 10px; 
+}
+
+.SendToUser {
+  margin-left: 50px;
+}
+

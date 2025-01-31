@@ -7,6 +7,10 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: "mysql",
+    timezone: "+05:30", // ✅ Forces IST (Indian Standard Time)
+    dialectOptions: {
+      timezone: "Asia/Kolkata", // ✅ Ensures MySQL understands IST
+    },
   }
 );
 
@@ -14,6 +18,7 @@ const models = {
   Question: require("./question")(sequelize, Sequelize.DataTypes),
   Option: require("./option")(sequelize, Sequelize.DataTypes),
   UserResponse: require("./userresponse")(sequelize, Sequelize.DataTypes),
+  UserToken: require("./usertoken")(sequelize, Sequelize.DataTypes),
 };
 
 // Add associations

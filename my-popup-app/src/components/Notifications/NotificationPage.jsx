@@ -8,14 +8,37 @@ function NotificationPage() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [token, setToken] = useState("");
+  const [userId, setUserId] = useState(""); // User ID for targeted notification
 
   // Request for Notification Permission and fetch Token
   useEffect(() => {
     const fetchToken = async () => {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
+      try {
+        if (!("Notification" in window)) {
+          alert("This browser does not support notifications.");
+          return;
+        }
+
+        if (Notification.permission === "default") {
+          const permission = await Notification.requestPermission();
+          if (permission !== "granted") {
+            alert("Notification permission denied.");
+            return;
+          }
+        }
+
         const newToken = await requestForToken();
-        if (newToken) setToken(newToken);
+        if (newToken) {
+          setToken(newToken);
+          // Store token in backend
+          await fetch("http://localhost:5000/api/storeToken", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: newToken }),
+          });
+        }
+      } catch (error) {
+        alert("Error while fetching token or storing it: " + error.message);
       }
     };
 
@@ -23,23 +46,26 @@ function NotificationPage() {
   }, []);
 
   // Handle the notification send process
-  const sendNotification = async () => {
+  const sendNotification = async (isSendToAll) => {
     if (!title || !body) {
-      alert("Please enter both title and message before sending!");
+      alert("Please enter both title and message!");
       return;
     }
 
-    const payload = { title, body, token };
+    const endpoint = isSendToAll
+      ? "http://localhost:5000/api/sendNotificationToAll"
+      : "http://localhost:5000/api/sendNotification";
+
+    const payload = isSendToAll
+      ? { title, body }
+      : { userId, title, body, token };
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/sendNotification",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
       if (data.success) {
@@ -52,6 +78,7 @@ function NotificationPage() {
           draggable: true,
           theme: "colored",
         });
+        console.log(endpoint);
 
         // Show browser notification if permission is granted
         if (Notification.permission === "granted") {
@@ -60,11 +87,12 @@ function NotificationPage() {
 
         setTitle("");
         setBody("");
+        setUserId("");
       } else {
-        throw new Error("Error while sending notification!");
+        throw new Error("Error sending notification!");
       }
     } catch (error) {
-      alert(error.message || "Error while sending notification!");
+      toast.error(error.message || "Error sending notification!");
     }
   };
 
@@ -81,10 +109,21 @@ function NotificationPage() {
         placeholder="Message..."
         value={body}
         onChange={(e) => setBody(e.target.value)}
-      ></textarea>
-      <input type="text" placeholder="User Token" value={token} readOnly />
-      <button onClick={sendNotification}>Send</button>
-
+      />
+      <input
+        type="text"
+        placeholder="User ID (Leave empty to send to all)"
+        value={userId}
+        onChange={(e) => setUserId(e.target.value)}
+      />
+      <div className="button-group">
+        <button onClick={() => sendNotification(false)} className="SendToUser">
+          Send to User
+        </button>
+        <button onClick={() => sendNotification(true)} className="SendToAll">
+          Send to All
+        </button>
+      </div>
       <ToastContainer />
     </div>
   );

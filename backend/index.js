@@ -2,11 +2,19 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./db.js");
 const app = express();
-app.use(cors());
+const admin = require("./firebase");
+app.use(
+  cors({
+    origin: "*", // Allow all origins
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "Content-Type, Authorization",
+  })
+);
+
 app.use(express.json());
 
 // Fetch all active questions with their options
-const { Question, Option } = require("./models");
+const { Question, Option, UserToken } = require("./models");
 
 app.get("/api/questions", async (req, res) => {
   try {
@@ -117,26 +125,80 @@ app.post("/api/saveResponses", async (req, res) => {
 });
 
 // notification service
-const admin = require("./firebase");
 
+// Send notification to a specific user
 app.post("/api/sendNotification", async (req, res) => {
   try {
-    const { title, body, token } = req.body;
+    const { title, body, token, user_id = "default" } = req.body;
 
-    if (!token || !title || !body) {
+    // if (!title || !body || !user_id) {
+    if (!title || !body) {
+      console.log("error misssing fields");
       return res.status(400).json({ error: "Missing required fields" });
     }
-    const message = {
-      notification: { title, body },
-      token: token,
-    };
+
+    // const userToken = await UserToken.findOne({ where: { user_id } });
+    // if (!userToken) {
+    //   return res.status(404).json({ error: "User not found or token missing" });
+    // }
+
+    const message = { notification: { title, body }, token: token };
+    console.log(message);
 
     await admin.messaging().send(message);
+    console.log(message);
 
     res.json({ success: true, message: "Notification sent successfully!" });
   } catch (error) {
     console.error("Error sending notification:", error);
     res.status(500).json({ error: "Failed to send notification" });
+  }
+});
+
+// Store FCM Token for a user
+app.post("/api/storeToken", async (req, res) => {
+  try {
+    const { user_id = "defaultUser", token } = req.body;
+
+    if (!user_id || !token) {
+      return res.status(400).json({ error: "Missing user_id or token" });
+    }
+
+    await UserToken.upsert({ user_id, token });
+
+    res.json({ success: true, message: "Token stored successfully" });
+  } catch (error) {
+    console.error("Error storing token:", error);
+    res.status(500).json({ error: "Failed to store token" });
+  }
+});
+
+// Send notification to all users
+app.post("/api/sendNotificationToAll", async (req, res) => {
+  try {
+    const { title, body } = req.body;
+
+    if (!title || !body) {
+      return res.status(400).json({ error: "Missing title or body" });
+    }
+
+    const tokens = await UserToken.findAll({ attributes: ["token"] });
+
+    if (!tokens.length) {
+      return res.status(404).json({ error: "No users found with FCM tokens" });
+    }
+
+    const messages = tokens.map((t) => ({
+      notification: { title, body },
+      token: t.token,
+    }));
+
+    await admin.messaging().sendEach(messages);
+
+    res.json({ success: true, message: "Notifications sent to all users!" });
+  } catch (error) {
+    console.error("Error sending notifications:", error);
+    res.status(500).json({ error: "Failed to send notifications" });
   }
 });
 
